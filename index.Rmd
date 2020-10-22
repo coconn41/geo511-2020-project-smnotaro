@@ -1,7 +1,7 @@
 ---
 title: "Environmental Justice Mapping"
 author: Sandra Notaro
-subtitle: Subtitle here if desired - change later
+subtitle: Subtitle here if desired, note to change later
 ---
 
 # Introduction
