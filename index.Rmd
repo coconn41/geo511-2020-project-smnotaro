@@ -6,60 +6,55 @@ subtitle: Subtitle here if desired - change later
 
 # Introduction
 
-[~ 200 words]
+Environmental justice mapping can be easily done with the EPA's EJSCREEN tool (https://ejscreen.epa.gov/mapper/). This mapping tool provides a great introduction to analyzing and comparing environmental justice issues, but if this were implemented in an upperclassmen college lab, this would not suffice for a three hour lab. Not only is mapping a useful skill, but understanding how to map in RStudio is very beneficial. The overall goal is to develop a step-by-step lab for students to create environmental justice maps in RStudio that are similar to EJSCREEN. The end product the maps will thus be presented in this project.
 
-Clearly stated background and questions / hypotheses / problems being addressed. Sets up the analysis in an interesting and compelling way.
+Low-income and race are key indicators to observe when analyzing environmental justice. In the context of Western New York, how have these marginalized communities been impacted unequally compared to higher-income and white neighborhoods? How can students observe the hazardous environmental impacts marginalized communities face? Exploration and comparison of environmental injustice will help students understand the core inequalities issues in Western New York. Therefore, I hypothesize that the lower-income and black neighborhoods will live closer to sites that have been or are in the process of being remediated. Despite the fact that some sites will be remediated already, this is still an indicator that the site was once contaminated, so it historically shows contamination marginalized communities have lived near.
 
 # Materials and methods
 
-[~ 200 words]
-
-Narrative: Clear narrative description of the data sources and methods. Includes data from at least two sources that were integrated / merged in R.
-
-Code: The code associated with the project is well organized and easy to follow. Demonstrates mastery of R graphics and functions.
-
-Data: The underlying data are publicly accessible via the web and downloaded/accessed within the Rmd script. If you want to use your own data, you must make it available on a website (e.g. Figshare) so that others are able to re-run your code.
-
-You can do bullets like this:
-
-* The first most important thing
-* The second most important thing
-* The third most important thing
-
-You can do numbers like this:
-
-1. The first most important thing
-2. The second most important thing
-3. The third most important thing
-
-See [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/) for all the amazing things you can do.
-
-
-Here's my first code chunk.
-```{r}
-1+2
-```
-
-Load any required packages in a code chunk (you may need to install some packages):
-
-```{r, message=F, warning=F}
+Accessing Census Data
+```{r access, eval=T, echo=T, results='hide', error=F , cache = T}
+library(tidycensus)
 library(tidyverse)
+library(tigris)
+library(sf)
+library(sp)
 library(leaflet)
-library(kableExtra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
+library(RColorBrewer)
+
+loadacs5 <- load_variables(2018, "acs5", cache = TRUE)
+api_key <- census_api_key("#type_you_API_here"), overwrite = TRUE, install = TRUE)
+# Request an API from here https://api.census.gov/data/key_signup.html
 ```
 
-## Download and clean all required data
-```{r}
-n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))
+```{r acs, eval=T, echo=T, results='hide', cache = T}
+tract_income <- get_acs(geography = "tract", variables = "B25121_001", state = "NY", county = c("Erie", "Niagara", "Cattaraugus"), year = 2018, geometry = TRUE)
+head(tract_income)
 ```
+
+Identifying the Largest Population Size with
+```{r tally, message=F, warning=F, results = 'hide' cache=T}
+income_lgst <- tract_income %>%
+  group_by(GEOID) %>%
+  filter(estimate == max(estimate)) %>%
+  select(NAME, variable, estimate) %>%
+income_summarize <- income_lgst %>%
+  group_by(variable) %>%
+  tally()
+```
+
+Preparing the Map
+```{r mapprep, eval=T, echo=T, results='hide', cache = T}
+ny_tracts <- tracts(state = "NY", county = c("Erie", "Niagara", "Cattaraugus"), cb = TRUE) %>%
+  st_transform("+proj=longlat +datum=WGS84")
+ny_water <- area_water(state = "NY", county = c("Erie", "Niagara", "Cattaraugus")) %>%
+  st_transform("+proj=longlat +datum=WGS84")
+ny_roads <- primary_secondary_roads(state = "NY", year = 2018) %>%
+  st_transform("+proj=longlat +datum=WGS84")
+options(tigris_class = "sf")
+options(tigris_use_cache = TRUE)
+```
+
 
 ```{r, results='asis'}
 data %>% 
@@ -69,22 +64,18 @@ data %>%
                   c("striped", "hover", "condensed", "responsive")) #apply other formatting
 ```
 
-Add any additional processing steps here.
-
 # Results
 
-[~200 words]
-
-Tables and figures (maps and other graphics) are carefully planned to convey the results of your analysis. Intense exploration and evidence of many trials and failures. The author looked at the data in many different ways before coming to the final presentation of the data.
-
-Show tables, plots, etc. and describe them.
-
-```{r, fig.width=6, fig.height=3, fig.cap="Map of completely random data"}
-m <- leaflet(data) %>% 
-  addTiles() %>% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %>% 
-  addPopups(~x[2], ~y[2], "Random popup")
-m  # a map with the default OSM tile layer
+Mapping Income in Erie Niagara and Cattaraugus Counties
+```{r mapincome, fig.width=6, fig.height=3, fig.cap= "Map of Income in Erie, Niagara, and Cattaraugus Counties"}
+income_pal <- colorQuantile(palette = "Purples", n = 5, domain = tract_income$estimate)
+income_map <- tract_income %>%
+  st_transform("+proj=longlat +datum=WGS84") %>%
+  leaflet() %>% 
+  addProviderTiles("Esri") %>% 
+  addPolygons(color = ~ income_pal(estimate)) %>%
+  setView(lng = -78.878738, lat = 42.880230, zoom = 8)
+income_map
 ```
 
 

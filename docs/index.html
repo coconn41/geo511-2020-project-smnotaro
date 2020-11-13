@@ -383,36 +383,23 @@ div.tocify {
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>[~ 200 words]</p>
-<p>Clearly stated background and questions / hypotheses / problems being addressed. Sets up the analysis in an interesting and compelling way.</p>
+<p>Environmental justice mapping can be easily done with the EPA’s EJSCREEN tool (<a href="https://ejscreen.epa.gov/mapper/" class="uri">https://ejscreen.epa.gov/mapper/</a>). This mapping tool provides a great introduction to analyzing and comparing environmental justice issues, but if this were implemented in an upperclassmen college lab, this would not suffice for a three hour lab. Not only is mapping a useful skill, but understanding how to map in RStudio is very beneficial. The overall goal is to develop a step-by-step lab for students to create environmental justice maps in RStudio that are similar to EJSCREEN. The end product the maps will thus be presented in this project.</p>
+<p>Low-income and race are key indicators to observe when analyzing environmental justice. In the context of Western New York, how have these marginalized communities been impacted unequally compared to higher-income and white neighborhoods? How can students observe the hazardous environmental impacts marginalized communities face? Exploration and comparison of environmental injustice will help students understand the core inequalities issues in Western New York. Therefore, I hypothesize that the lower-income and black neighborhoods will live closer to sites that have been or are in the process of being remediated. Despite the fact that some sites will be remediated already, this is still an indicator that the site was once contaminated, so it historically shows contamination marginalized communities have lived near.</p>
 </div>
 <div id="materials-and-methods" class="section level1">
 <h1>Materials and methods</h1>
-<p>[~ 200 words]</p>
-<p>Narrative: Clear narrative description of the data sources and methods. Includes data from at least two sources that were integrated / merged in R.</p>
-<p>Code: The code associated with the project is well organized and easy to follow. Demonstrates mastery of R graphics and functions.</p>
-<p>Data: The underlying data are publicly accessible via the web and downloaded/accessed within the Rmd script. If you want to use your own data, you must make it available on a website (e.g. Figshare) so that others are able to re-run your code.</p>
-<p>You can do bullets like this:</p>
-<ul>
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
-</ul>
-<p>You can do numbers like this:</p>
-<ol style="list-style-type: decimal">
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
-</ol>
-<p>See <a href="http://rmarkdown.rstudio.com/">http://rmarkdown.rstudio.com/</a> for all the amazing things you can do.</p>
-<p>Here’s my first code chunk.</p>
-<pre class="r"><code>1+2</code></pre>
-<pre><code>## [1] 3</code></pre>
-<p>Load any required packages in a code chunk (you may need to install some packages):</p>
-<pre class="r"><code>library(tidyverse)
-library(leaflet)
-library(kableExtra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling</code></pre>
+<p>Accessing Census Data</p>
+<pre class="r"><code>library(tidycensus)
+library(tidyverse)
+loadacs5 &lt;- load_variables(2018, &quot;acs5&quot;, cache = TRUE)
+api_key &lt;- census_api_key(&quot;41d82fe746ff3e071dc59dfe43267b617e210820&quot;, overwrite = TRUE, install = TRUE)</code></pre>
+<pre><code>## Your original .Renviron will be backed up and stored in your R HOME directory if needed.</code></pre>
+<pre><code>## Your API key has been stored in your .Renviron and can be accessed by Sys.getenv(&quot;CENSUS_API_KEY&quot;). 
+## To use now, restart R or run `readRenviron(&quot;~/.Renviron&quot;)`</code></pre>
+<pre class="r"><code>tract_income &lt;- get_acs(geography = &quot;tract&quot;, variables = &quot;B25121_001&quot;, state = &quot;NY&quot;, county = c(&quot;Erie&quot;, &quot;Niagara&quot;, &quot;Cattaraugus&quot;, year = 2018))</code></pre>
+<pre><code>## Getting data from the 2014-2018 5-year ACS</code></pre>
+<pre class="r"><code>head(tract_income)
+knitr::kable(tract_income, &quot;simple&quot;)</code></pre>
 <div id="download-and-clean-all-required-data" class="section level2">
 <h2>Download and clean all required data</h2>
 <pre class="r"><code>n=20
@@ -451,172 +438,172 @@ value
 <tbody>
 <tr>
 <td style="text-align:center;">
-59.20
+-105.53
 </td>
 <td style="text-align:center;">
-43.23
+-9.61
 </td>
 <td style="text-align:center;">
-10.02
+14.59
+</td>
+<td style="text-align:center;">
+b
+</td>
+<td style="text-align:center;">
+0.03
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+-75.16
+</td>
+<td style="text-align:center;">
+-23.60
+</td>
+<td style="text-align:center;">
+6.67
 </td>
 <td style="text-align:center;">
 d
 </td>
 <td style="text-align:center;">
-1.42
+-1.22
 </td>
 </tr>
 <tr>
 <td style="text-align:center;">
-132.45
+-91.73
 </td>
 <td style="text-align:center;">
-10.81
+5.68
 </td>
 <td style="text-align:center;">
-14.32
+11.65
 </td>
 <td style="text-align:center;">
-a
+b
 </td>
 <td style="text-align:center;">
-0.88
+-0.16
 </td>
 </tr>
 <tr>
 <td style="text-align:center;">
--79.87
+153.41
 </td>
 <td style="text-align:center;">
-36.04
+-25.10
 </td>
 <td style="text-align:center;">
-15.38
+14.23
+</td>
+<td style="text-align:center;">
+d
+</td>
+<td style="text-align:center;">
+0.17
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+157.74
+</td>
+<td style="text-align:center;">
+53.53
+</td>
+<td style="text-align:center;">
+5.14
+</td>
+<td style="text-align:center;">
+b
+</td>
+<td style="text-align:center;">
+0.43
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+56.69
+</td>
+<td style="text-align:center;">
+-44.91
+</td>
+<td style="text-align:center;">
+5.75
 </td>
 <td style="text-align:center;">
 e
 </td>
 <td style="text-align:center;">
--0.19
+0.08
 </td>
 </tr>
 <tr>
 <td style="text-align:center;">
-5.86
+-13.11
 </td>
 <td style="text-align:center;">
-30.75
+4.43
 </td>
 <td style="text-align:center;">
-8.85
+11.47
 </td>
 <td style="text-align:center;">
 b
 </td>
 <td style="text-align:center;">
-1.14
+1.36
 </td>
 </tr>
 <tr>
 <td style="text-align:center;">
-5.64
+-120.15
 </td>
 <td style="text-align:center;">
-28.31
+-59.03
 </td>
 <td style="text-align:center;">
-17.01
+11.14
 </td>
 <td style="text-align:center;">
 a
 </td>
 <td style="text-align:center;">
-0.35
+0.46
 </td>
 </tr>
 <tr>
 <td style="text-align:center;">
-11.08
+-148.67
 </td>
 <td style="text-align:center;">
-3.74
+48.85
 </td>
 <td style="text-align:center;">
-13.57
-</td>
-<td style="text-align:center;">
-e
-</td>
-<td style="text-align:center;">
--1.29
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-85.75
-</td>
-<td style="text-align:center;">
--10.70
-</td>
-<td style="text-align:center;">
-6.04
+14.68
 </td>
 <td style="text-align:center;">
 b
 </td>
 <td style="text-align:center;">
-0.53
+0.81
 </td>
 </tr>
 <tr>
 <td style="text-align:center;">
-132.16
+-92.26
 </td>
 <td style="text-align:center;">
--17.93
+-58.81
 </td>
 <td style="text-align:center;">
-19.68
+5.73
 </td>
 <td style="text-align:center;">
 b
 </td>
 <td style="text-align:center;">
-1.41
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-48.41
-</td>
-<td style="text-align:center;">
--43.93
-</td>
-<td style="text-align:center;">
-18.06
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
--2.02
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-107.25
-</td>
-<td style="text-align:center;">
-42.99
-</td>
-<td style="text-align:center;">
-16.63
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--1.67
+0.33
 </td>
 </tr>
 </tbody>
@@ -635,8 +622,8 @@ c
   addPopups(~x[2], ~y[2], &quot;Random popup&quot;)
 m  # a map with the default OSM tile layer</code></pre>
 <div class="figure">
-<div id="htmlwidget-518ba1650144ca4341af" style="width:576px;height:288px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-518ba1650144ca4341af">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[43.2303342595696,10.8072271663696,36.0414990596473,30.7479447405785,28.3098812308162,3.74218476936221,-10.6974288448691,-17.9256225004792,-43.932974813506,42.9927086178213,35.5884244199842,12.9839603975415,35.4592339508235,-17.1163924410939,-48.4315034095198,37.8742029424757,29.4627669733018,-11.6585989203304,9.68012924306095,-20.855622170493],[59.2044757772237,132.45371603407,-79.8694470059127,5.85886817425489,5.6364749930799,11.079470012337,85.7493777293712,132.158546308056,48.4109828900546,107.248865906149,-61.3038344029337,-52.1424693893641,-146.272967420518,-157.038132827729,39.1110507678241,179.601499848068,-109.217458963394,-5.44493048451841,134.12489393726,-83.6754571739584],[10.0229069334455,14.3225722468924,15.3847711859271,8.85363647365011,17.0085918426048,13.5731187392958,6.04393281624652,19.6840408840217,18.0592800467275,16.62892963388,8.92191894934513,12.2151111846324,11.5024836314842,12.5768967601471,14.239661314059,12.4249158403836,18.1427941832226,16.7586075805593,10.2095445676241,17.6290119613986],null,null,{"interactive":true,"className":"","stroke":true,"color":["d","a","e","b","a","e","b","b","a","c","d","d","b","c","e","a","e","e","b","b"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["d","a","e","b","a","e","b","b","a","c","d","d","b","c","e","a","e","e","b","b"],"fillOpacity":0.2},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPopups","args":[10.8072271663696,132.45371603407,"Random popup",null,null,{"maxWidth":300,"minWidth":50,"autoPan":true,"keepInView":false,"closeButton":true,"className":""}]}],"limits":{"lat":[-48.4315034095198,43.2303342595696],"lng":[-157.038132827729,179.601499848068]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-60293b8e36ec6155df83" style="width:576px;height:288px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-60293b8e36ec6155df83">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[-9.61350398138165,-23.5953464917839,5.68085401318967,-25.0957541540265,53.5301415715367,-44.9145863950253,4.4260371197015,-59.0259866416454,48.8495878502727,-58.8068978022784,-43.4660911560059,45.9621626883745,8.81444139406085,36.5702006779611,-21.670282445848,9.20313318260014,21.4173140376806,-0.249332897365093,2.1646586805582,-42.8215773124248],[-105.530034787953,-75.1559635531157,-91.7254104930907,153.413209151477,157.73795007728,56.6897951904684,-13.1057476624846,-120.146281281486,-148.665791982785,-92.2636134177446,-7.9314779676497,-33.5380728822201,-113.956747110933,155.48016292043,13.0939489603043,12.4288473743945,-160.222628563643,-90.4639032203704,-120.14603946358,170.401445394382],[14.5919365936425,6.66630033054389,11.6489965643268,14.2342478863429,5.13975098612718,5.7461435359437,11.4690969046205,11.1398728366476,14.6794615651015,5.72577826329507,15.4935834987555,15.4760452220216,13.4282881417312,8.49423899664544,17.8211290272884,15.4894543217961,10.5113761534449,10.6308925407939,11.3817862758879,6.42525103758089],null,null,{"interactive":true,"className":"","stroke":true,"color":["b","d","b","d","b","e","b","a","b","b","a","c","c","c","b","c","c","e","d","a"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["b","d","b","d","b","e","b","a","b","b","a","c","c","c","b","c","c","e","d","a"],"fillOpacity":0.2},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPopups","args":[-23.5953464917839,-75.1559635531157,"Random popup",null,null,{"maxWidth":300,"minWidth":50,"autoPan":true,"keepInView":false,"closeButton":true,"className":""}]}],"limits":{"lat":[-59.0259866416454,53.5301415715367],"lng":[-160.222628563643,170.401445394382]}},"evals":[],"jsHooks":[]}</script>
 <p class="caption">
 Map of completely random data
 </p>
@@ -644,7 +631,7 @@ Map of completely random data
 <pre class="r"><code>data %&gt;% 
   ggplot(aes(x=x,y=y,col=category))+
   geom_point()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
