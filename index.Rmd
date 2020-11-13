@@ -21,6 +21,7 @@ library(sf)
 library(sp)
 library(leaflet)
 library(RColorBrewer)
+library(scales)
 
 loadacs5 <- load_variables(2018, "acs5", cache = TRUE)
 api_key <- census_api_key("#type_you_API_here"), overwrite = TRUE, install = TRUE)
@@ -68,13 +69,19 @@ data %>%
 
 Mapping Income in Erie Niagara and Cattaraugus Counties
 ```{r mapincome, fig.width=6, fig.height=3, fig.cap= "Map of Income in Erie, Niagara, and Cattaraugus Counties"}
-income_pal <- colorQuantile(palette = "Purples", n = 5, domain = tract_income$estimate)
+income_pal <- colorBin(palette = "RdPu", bins = 5, domain = tract_income$estimate)
+
 income_map <- tract_income %>%
   st_transform("+proj=longlat +datum=WGS84") %>%
-  leaflet() %>% 
+  leaflet() %>%
+  setView(lng = -78.878738, lat = 42.880230, zoom = 7) %>%
+  setMaxBounds(lng1 = -78.878738, lat1 = 45.027500, lng2 = -78.878738, lat2 = 40.440624) %>%
   addProviderTiles("Esri") %>% 
-  addPolygons(color = ~ income_pal(estimate)) %>%
-  setView(lng = -78.878738, lat = 42.880230, zoom = 8)
+  addPolygons(weight = 1, fillOpacity = 0.5, color = ~ income_pal(estimate), 
+              label = ~paste0("Estimate Income: ", dollar(estimate))) %>%
+  addLegend(position = "topright", pal = income_pal, values = ~estimate,
+            title = "Tract Income Estimate", opacity = 0.7, 
+            labFormat = labelFormat(prefix = "$"))
 income_map
 ```
 
