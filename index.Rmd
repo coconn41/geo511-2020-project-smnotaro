@@ -1,7 +1,7 @@
 ---
 title: "Environmental Justice Mapping"
 author: Sandra Notaro
-subtitle: Subtitle here if desired - change later
+subtitle: Mapping Income and Race with Department of Environmental Conservation Sites in Erie, Niagara, and Cattaraugus Counties
 ---
 
 # Introduction
@@ -21,6 +21,8 @@ library(sf)
 library(sp)
 library(leaflet)
 library(RColorBrewer)
+library(scales)
+library(kableExtra)
 
 loadacs5 <- load_variables(2018, "acs5", cache = TRUE)
 #api_key <- census_api_key("type_your_API_here"), overwrite = TRUE, install = TRUE)
@@ -33,22 +35,36 @@ tract_income <- get_acs(geography = "tract", variables = "B19125_001", state = "
                         year = 2018, geometry = TRUE)
 #head(tract_income)
 
+
 tract_race <- get_acs(geography = "tract", variables = "B02001_003", state = "NY",
                       county = c("Erie", "Niagara", "Cattaraugus"), 
                       year = 2018, geometry = TRUE)
 #head(tract_race)
+
+race_eth <- c(White = "B03002_003", Black = "B03002_004", Indigenous = "B03002_005",
+          Asian = "B03002_006", Hispanic = 	"B03002_012")
+race_eth_acs <- get_acs(geography = "tract", state = "NY",
+                      county = c("Erie", "Niagara", "Cattaraugus"), variables = race_eth,
+                      summary_var = "B03002_001",
+                      year = 2018, geometry = TRUE)
+#head(race_eth_acs)
 ```
 
-Identifying the Largest Population Size with
-```{r tally, message=F, warning=F, results = 'hide' cache=T}
-income_lgst <- tract_income %>%
+Finding the Number of Tracts Where a Race or Ethnicity is the Largest for that Tract
+```{r tally, message=F, warning=F, cache=T}
+race_eth_lgst <- race_eth_acs %>%
   group_by(GEOID) %>%
   filter(estimate == max(estimate)) %>%
   select(NAME, variable, estimate) %>%
-income_summarize <- income_lgst %>%
+  st_set_geometry(NULL)
+
+race_eth_summarize <- race_lgst %>%
   group_by(variable) %>%
   tally()
+kable(race_eth_summarize) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
+
 
 Preparing the Map
 ```{r mapprep, eval=T, echo=T, results='hide', cache = T}
@@ -74,7 +90,7 @@ options(tigris_use_cache = TRUE)
 # Results
 
 Mapping Median Household Income Estimate in the Past 12 Months in Erie Niagara and Cattaraugus Counties
-```{r mapincome, eval=T, echo=T, cache=T}
+```{r mapincome, eval=T, echo=T, warning=F, message=F, cache=T}
 income_pal <- colorBin(palette = "Greens", bins = 6, domain = tract_income$estimate)
 
 income_map <- tract_income %>%
