@@ -13,7 +13,7 @@ Low-income and race are key indicators to observe when analyzing environmental j
 # Materials and methods
 
 Accessing Census Data
-```{r access, eval=T, echo=T, results='hide', error=F , cache = T}
+```{r access, eval=T, echo=T, cache = T}
 library(tidycensus)
 library(tidyverse)
 library(tigris)
@@ -21,16 +21,22 @@ library(sf)
 library(sp)
 library(leaflet)
 library(RColorBrewer)
-library(scales)
 
 loadacs5 <- load_variables(2018, "acs5", cache = TRUE)
-api_key <- census_api_key("#type_you_API_here"), overwrite = TRUE, install = TRUE)
+#api_key <- census_api_key("type_your_API_here"), overwrite = TRUE, install = TRUE)
 # Request an API from here https://api.census.gov/data/key_signup.html
 ```
 
-```{r acs, eval=T, echo=T, results='hide', cache = T}
-tract_income <- get_acs(geography = "tract", variables = "B25121_001", state = "NY", county = c("Erie", "Niagara", "Cattaraugus"), year = 2018, geometry = TRUE)
-head(tract_income)
+```{r acs, eval=T, echo=T, results='hide', message=F, cache = T}
+tract_income <- get_acs(geography = "tract", variables = "B19125_001", state = "NY", 
+                        county = c("Erie", "Niagara", "Cattaraugus"), 
+                        year = 2018, geometry = TRUE)
+#head(tract_income)
+
+tract_race <- get_acs(geography = "tract", variables = "B02001_001", state = "NY",
+                      county = c("Erie", "Niagara", "Cattaraugus"), 
+                      year = 2018, geometry = TRUE)
+#head(tract_race)
 ```
 
 Identifying the Largest Population Size with
@@ -58,18 +64,18 @@ options(tigris_use_cache = TRUE)
 
 
 ```{r, results='asis'}
-data %>% 
-  slice(1:10) %>% #show only 1:n rows
-  kable(digits=2,align="c")%>% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c("striped", "hover", "condensed", "responsive")) #apply other formatting
+#data %>% 
+  #slice(1:10) %>% #show only 1:n rows
+  #kable(digits=2,align="c")%>% #make table and round to two digits
+  #kable_styling(bootstrap_options = 
+                  #c("striped", "hover", "condensed", "responsive")) #apply other formatting
 ```
 
 # Results
 
-Mapping Income in Erie Niagara and Cattaraugus Counties
-```{r mapincome, fig.width=6, fig.height=3, fig.cap= "Map of Income in Erie, Niagara, and Cattaraugus Counties"}
-income_pal <- colorBin(palette = "RdPu", bins = 5, domain = tract_income$estimate)
+Mapping Median Household Income Estimate in the Past 12 Months in Erie Niagara and Cattaraugus Counties
+```{r mapincome, eval=T, echo=T, cache=T}
+income_pal <- colorBin(palette = "Greens", bins = 6, domain = tract_income$estimate)
 
 income_map <- tract_income %>%
   st_transform("+proj=longlat +datum=WGS84") %>%
@@ -77,19 +83,19 @@ income_map <- tract_income %>%
   setView(lng = -78.878738, lat = 42.880230, zoom = 7) %>%
   setMaxBounds(lng1 = -78.878738, lat1 = 45.027500, lng2 = -78.878738, lat2 = 40.440624) %>%
   addProviderTiles("Esri") %>% 
-  addPolygons(weight = 1, fillOpacity = 0.5, color = ~ income_pal(estimate), 
-              label = ~paste0("Estimate Income: ", dollar(estimate))) %>%
-  addLegend(position = "topright", pal = income_pal, values = ~estimate,
-            title = "Tract Income Estimate", opacity = 0.7, 
+  addPolygons(weight = 2, fillOpacity = 0.8, color = ~ income_pal(estimate), 
+              label = ~paste0("Estimate Household Income: ", dollar(estimate))) %>%
+  addLegend(position = "topright", pal = income_pal , values = ~estimate,
+            title = "Median Household Income", opacity = 0.7,
             labFormat = labelFormat(prefix = "$"))
 income_map
 ```
 
 
 ```{r}
-data %>% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()
+#data %>% 
+  #ggplot(aes(x=x,y=y,col=category))+
+  #geom_point()
 ```
 
 # Conclusions
