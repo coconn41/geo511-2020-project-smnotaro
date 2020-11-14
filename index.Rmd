@@ -6,14 +6,14 @@ subtitle: Mapping Income and Race with Department of Environmental Conservation 
 
 # Introduction
 
-Environmental justice mapping can be easily done with the EPA's EJSCREEN tool (https://ejscreen.epa.gov/mapper/). This mapping tool provides a great introduction to analyzing and comparing environmental justice issues, but if this were implemented in an upperclassmen college lab, this would not suffice for a three hour lab. Not only is mapping a useful skill, but understanding how to map in RStudio is very beneficial. The overall goal is to develop a step-by-step lab for students to create environmental justice maps in RStudio that are similar to EJSCREEN. The end product the maps will thus be presented in this project.
+Environmental justice mapping can be easily done with the EPA's EJSCREEN tool (https://ejscreen.epa.gov/mapper/). This mapping tool provides a great introduction to analyzing and comparing environmental justice issues, but if this were implemented in an upperclassmen college lab, this would not suffice for a three hour lab. Not only is mapping a useful skill, but understanding how to map in RStudio is very beneficial. The overall goal is to develop a step-by-step lab for students to create environmental justice maps in RStudio that are similar to EJSCREEN. The end product of these maps will thus be presented in this project.
 
 Low-income and race are key indicators to observe when analyzing environmental justice. In the context of Western New York, how have these marginalized communities been impacted unequally compared to higher-income and white neighborhoods? How can students observe the hazardous environmental impacts marginalized communities face? Exploration and comparison of environmental injustice will help students understand the core inequalities issues in Western New York. Therefore, I hypothesize that the lower-income and black neighborhoods will live closer to sites that have been or are in the process of being remediated. Despite the fact that some sites will be remediated already, this is still an indicator that the site was once contaminated, so it historically shows contamination marginalized communities have lived near.
 
 # Materials and methods
 
 Accessing Census Data
-```{r access, eval=T, echo=T, cache = T}
+```{r access, eval=T, echo=T, message=F, results='hide', cache = T}
 library(tidycensus)
 library(tidyverse)
 library(tigris)
@@ -58,16 +58,18 @@ race_eth_lgst <- race_eth_acs %>%
   select(NAME, variable, estimate) %>%
   st_set_geometry(NULL)
 
-race_eth_summarize <- race_lgst %>%
+race_eth_summarize <- race_eth_lgst %>%
   group_by(variable) %>%
-  tally()
+  tally() %>%
+  rename(c("Race/Ethnicity" = variable, "Number of Tracts" = n))
+
 kable(race_eth_summarize) %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
 
 
 Preparing the Map
-```{r mapprep, eval=T, echo=T, results='hide', cache = T}
+```{r mapprep, eval=T, echo=F, results='hide', cache = T}
 ny_tracts <- tracts(state = "NY", county = c("Erie", "Niagara", "Cattaraugus"), cb = TRUE) %>%
   st_transform("+proj=longlat +datum=WGS84")
 ny_water <- area_water(state = "NY", county = c("Erie", "Niagara", "Cattaraugus")) %>%
@@ -79,7 +81,7 @@ options(tigris_use_cache = TRUE)
 ```
 
 
-```{r, results='asis'}
+```{r, echo = F, results='asis'}
 #data %>% 
   #slice(1:10) %>% #show only 1:n rows
   #kable(digits=2,align="c")%>% #make table and round to two digits
@@ -124,7 +126,7 @@ race_map <- tract_race %>%
 race_map
 ```
 
-```{r}
+```{r, echo = F}
 #data %>% 
   #ggplot(aes(x=x,y=y,col=category))+
   #geom_point()
