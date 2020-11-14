@@ -33,7 +33,7 @@ tract_income <- get_acs(geography = "tract", variables = "B19125_001", state = "
                         year = 2018, geometry = TRUE)
 #head(tract_income)
 
-tract_race <- get_acs(geography = "tract", variables = "B02001_001", state = "NY",
+tract_race <- get_acs(geography = "tract", variables = "B02001_003", state = "NY",
                       county = c("Erie", "Niagara", "Cattaraugus"), 
                       year = 2018, geometry = TRUE)
 #head(tract_race)
@@ -91,6 +91,22 @@ income_map <- tract_income %>%
 income_map
 ```
 
+Mapping Estimate Total Black or African American Population in Erie Niagara and Cattaraugus Counties
+```{r maprace, eval=T, echo=T, cache=T}
+race_pal <- colorBin(palette = "YlGnBu", bins = 5, domain = tract_race$estimate)
+
+race_map <- tract_race %>%
+  st_transform("+proj=longlat +datum=WGS84") %>%
+  leaflet() %>%
+  setView(lng = -78.878738, lat = 42.880230, zoom = 7) %>%
+  setMaxBounds(lng1 = -78.878738, lat1 = 45.027500, lng2 = -78.878738, lat2 = 40.440624) %>%
+  addProviderTiles("Esri") %>% 
+  addPolygons(weight = 2, fillOpacity = 0.8, color = ~ race_pal(estimate), 
+              label = ~paste0("Estimate Population: ", estimate)) %>%
+  addLegend(position = "topright", pal = race_pal , values = ~estimate,
+            title = "Black or African American Population", opacity = 0.7)
+race_map
+```
 
 ```{r}
 #data %>% 
