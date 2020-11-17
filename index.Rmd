@@ -13,7 +13,7 @@ Low-income and race are key indicators to observe when analyzing environmental j
 # Materials and methods
 
 Accessing Census Data
-```{r access, eval=T, echo=T, message=F, results='hide', cache = T}
+```{r access, eval=T, echo=T, message=F, results='hide', cache = F}
 library(tidycensus)
 library(tidyverse)
 library(tigris)
@@ -25,11 +25,11 @@ library(scales)
 library(kableExtra)
 
 loadacs5 <- load_variables(2018, "acs5", cache = TRUE)
-#api_key <- census_api_key("type_your_API_here"), overwrite = TRUE, install = TRUE)
+#api_key <- census_api_key("type_your_API_here")
 # Request an API from here https://api.census.gov/data/key_signup.html
 ```
 
-```{r acs, eval=T, echo=T, results='hide', message=F, cache = T}
+```{r acs, eval=T, echo=T, results='hide', message=F, cache = F}
 tract_income <- get_acs(geography = "tract", variables = "B19125_001", state = "NY", 
                         county = c("Erie", "Niagara", "Cattaraugus"), 
                         year = 2018, geometry = TRUE)
@@ -51,7 +51,7 @@ race_eth_acs <- get_acs(geography = "tract", state = "NY",
 ```
 
 Finding the Number of Tracts Where a Race or Ethnicity is the Largest for that Tract
-```{r tally, message=F, warning=F, cache=T}
+```{r tally, message=F, warning=F, cache=F}
 race_eth_lgst <- race_eth_acs %>%
   group_by(GEOID) %>%
   filter(estimate == max(estimate)) %>%
@@ -69,7 +69,7 @@ kable(race_eth_summarize) %>%
 
 
 Preparing the Map
-```{r mapprep, eval=T, echo=F, results='hide', cache = T}
+```{r mapprep, eval=T, echo=F, results='hide', cache = F}
 ny_tracts <- tracts(state = "NY", county = c("Erie", "Niagara", "Cattaraugus"), cb = TRUE) %>%
   st_transform("+proj=longlat +datum=WGS84")
 ny_water <- area_water(state = "NY", county = c("Erie", "Niagara", "Cattaraugus")) %>%
@@ -92,7 +92,7 @@ options(tigris_use_cache = TRUE)
 # Results
 
 Mapping Median Household Income Estimate in the Past 12 Months in Erie Niagara and Cattaraugus Counties
-```{r mapincome, eval=T, echo=T, warning=F, message=F, cache=T}
+```{r mapincome, eval=T, echo=T, warning=F, message=F, cache=F}
 income_pal <- colorBin(palette = "Greens", bins = 6, domain = tract_income$estimate)
 
 income_map <- tract_income %>%
@@ -109,8 +109,8 @@ income_map <- tract_income %>%
 income_map
 ```
 
-Mapping Estimate Total Black or African American Population in Erie Niagara and Cattaraugus Counties
-```{r maprace, eval=T, echo=T, cache=T}
+Mapping Estimate Total Black Population in Erie Niagara and Cattaraugus Counties
+```{r maprace, eval=T, echo=T, cache=F}
 race_pal <- colorBin(palette = "YlGnBu", bins = 5, domain = tract_race$estimate)
 
 race_map <- tract_race %>%
@@ -122,7 +122,7 @@ race_map <- tract_race %>%
   addPolygons(weight = 2, fillOpacity = 0.8, color = ~ race_pal(estimate), 
               label = ~paste0("Estimate Population: ", estimate)) %>%
   addLegend(position = "topright", pal = race_pal , values = ~estimate,
-            title = "Black or African American Population", opacity = 0.7)
+            title = "Black Population", opacity = 0.7)
 race_map
 ```
 
