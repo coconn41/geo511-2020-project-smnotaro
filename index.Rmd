@@ -6,9 +6,9 @@ subtitle: Mapping Income and Race with Department of Environmental Conservation 
 
 # Introduction
 
-Environmental justice mapping can be easily done with the EPA's EJSCREEN tool (https://ejscreen.epa.gov/mapper/). This mapping tool provides a great introduction to analyzing and comparing environmental justice issues, but if this were implemented in an upperclassmen college lab, this would not suffice for a three hour lab. Not only is mapping a useful skill, but understanding how to map in RStudio is very beneficial. The overall goal is to develop a step-by-step lab for students to create environmental justice maps in RStudio that are similar to EJSCREEN. The end product of these maps will thus be presented in this project.
+Environmental justice mapping can be easily done with the EPA's EJSCREEN tool (https://ejscreen.epa.gov/mapper/). This mapping tool provides a great introduction to analyzing and comparing environmental justice issues, but if this were implemented in an upperclassmen college lab, this would not suffice for a three hour lab . Not only is mapping a useful skill, but understanding how to map in RStudio is very beneficial. The overall goal is to develop a step-by-step lab for students to create environmental justice maps in RStudio that are similar to EJSCREEN. The end product of these maps will thus be presented in this project.
 
-Low-income and race are key indicators to observe when analyzing environmental justice. In the context of Western New York, how have these marginalized communities been impacted unequally compared to higher-income and white neighborhoods? How can students observe the hazardous environmental impacts marginalized communities face? Exploration and comparison of environmental injustice will help students understand the core inequalities issues in Western New York. Therefore, I hypothesize that the lower-income and black neighborhoods will live closer to sites that have been or are in the process of being remediated. Despite the fact that some sites will be remediated already, this is still an indicator that the site was once contaminated, so it historically shows contamination marginalized communities have lived near.
+Low-income and race are key indicators to observe when analyzing environmental justice. In the context of Western New York, how have these marginalized communities been impacted unequally compared to higher-income and white neighborhoods ? How can students observe the hazardous environmental impacts marginalized communities face ? Exploration and comparison of environmental injustice will help students understand the core inequalities issues in Western New York. Therefore, I hypothesize that the lower-income and black neighborhoods will live closer to sites that have been or are in the process of being remediated. Despite the fact that some sites will be remediated already, this is still an indicator that the site was once contaminated,  so it historically shows contamination marginalized communities have lived near.
 
 # Materials and methods
 
@@ -25,7 +25,7 @@ library(scales)
 library(kableExtra)
 
 loadacs5 <- load_variables(2018, "acs5", cache = TRUE)
-#api_key <- census_api_key("type_your_API_here")
+#api_key <- census_api_key("type_your_API_here") 
 # Request an API from here https://api.census.gov/data/key_signup.html
 ```
 
@@ -99,7 +99,6 @@ income_map <- tract_income %>%
   st_transform("+proj=longlat +datum=WGS84") %>%
   leaflet() %>%
   setView(lng = -78.878738, lat = 42.880230, zoom = 7) %>%
-  setMaxBounds(lng1 = -78.878738, lat1 = 45.027500, lng2 = -78.878738, lat2 = 40.440624) %>%
   addProviderTiles("Esri") %>% 
   addPolygons(weight = 2, fillOpacity = 0.8, color = ~ income_pal(estimate), 
               label = ~paste0("Estimate Household Income: ", dollar(estimate))) %>%
@@ -117,13 +116,36 @@ race_map <- tract_race %>%
   st_transform("+proj=longlat +datum=WGS84") %>%
   leaflet() %>%
   setView(lng = -78.878738, lat = 42.880230, zoom = 7) %>%
-  setMaxBounds(lng1 = -78.878738, lat1 = 45.027500, lng2 = -78.878738, lat2 = 40.440624) %>%
   addProviderTiles("Esri") %>% 
   addPolygons(weight = 2, fillOpacity = 0.8, color = ~ race_pal(estimate), 
               label = ~paste0("Estimate Population: ", estimate)) %>%
   addLegend(position = "topright", pal = race_pal , values = ~estimate,
             title = "Black Population", opacity = 0.7)
 race_map
+```
+```{r newmapoption}
+race_pal <- colorBin(palette = "YlGnBu", bins = 5, domain = tract_race$estimate)
+income_pal <- colorBin(palette = "Greens", bins = 6, domain = tract_income$estimate)
+tract_race_tnsf=st_transform(tract_race,"+proj=longlat +datum=WGS84")
+tract_income_tnsf=st_transform(tract_income,"+proj=longlat +datum=WGS84")
+newmap=leaflet() %>%
+  addTiles() %>%
+  addPolygons(data=tract_income_tnsf,
+              weight=2,
+              fillOpacity =0.8,
+              color = ~income_pal(estimate),
+              label = ~paste0("Estimate Household Income: ", dollar(estimate)),
+              group="Tract Income") %>%
+  addPolygons(data=tract_race_tnsf,weight = 2, fillOpacity = 0.8, color = ~ race_pal(estimate), 
+              label = ~paste0("Estimate Population: ", ~estimate,
+              group="Tract Race")) %>%
+  addLegend(data = tract_income_tnsf, position = "topright", pal = income_pal , values = ~estimate,
+            title = "Median Household Income", opacity = 0.7,
+            labFormat = labelFormat(prefix = "$")) %>%
+  addLegend(data=tract_race_tnsf,position = "topright", pal = race_pal , values = ~estimate,
+            title = "Black Population", opacity = 0.7) %>%
+  addLayersControl(overlayGroups = c("Tract Income","Tract Race"),position='bottomleft')
+newmap
 ```
 
 ```{r, echo = F}
